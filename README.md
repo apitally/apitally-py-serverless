@@ -48,16 +48,13 @@ Drill down from insights to individual requests or use powerful filtering to und
 
 Get notified immediately if something isn't right using custom alerts, synthetic uptime checks and heartbeat monitoring. Notifications can be delivered via email, Slack or Microsoft Teams.
 
-## Install
+## Installation
 
-Use `pip` to install and provide your framework of choice as an extra, for
-example:
+Use `uv` to add this SDK to your project's dependencies:
 
 ```bash
-pip install apitally-serverless[fastapi]
+uv add apitally-serverless
 ```
-
-The available extras are: `fastapi` and `starlette`.
 
 ## Usage
 
@@ -67,7 +64,7 @@ all the details you need to get started.
 ### FastAPI
 
 This is an example of how to add the Apitally middleware to a FastAPI
-application. For further instructions, see our
+application running on a supported serverless platform. For further instructions, see our
 [setup guide for FastAPI](https://docs.apitally.io/frameworks/fastapi-serverless).
 
 ```python
