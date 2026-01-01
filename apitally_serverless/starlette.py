@@ -173,7 +173,6 @@ class ApitallyMiddleware:
                     "body": response_body or None,
                 },
                 "validation_errors": validation_errors,
-                "exclude": False,
             }
 
             self.masker.apply_masking(data)
@@ -249,7 +248,7 @@ def _extract_validation_errors(response_body: bytes) -> list[ValidationErrorDict
                             "type": str(error_type),
                         }
                     )
-            return errors if errors else None
+            return errors
     except (json.JSONDecodeError, UnicodeDecodeError):  # pragma: no cover
         pass
 

@@ -61,7 +61,7 @@ def _skip_empty_values(data: dict[str, Any]) -> dict[str, Any]:
     return {
         k: _skip_empty_values(v) if isinstance(v, dict) else v
         for k, v in data.items()
-        if v is not None and v != [] and v != {} and v != "" and v is not False
+        if v is not None and not (isinstance(v, (list, dict, bytes, str)) and len(v) == 0)
     }
 
 
