@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Iterable, Optional, Tuple, Union
+from typing import Iterable
 
 
 SUPPORTED_CONTENT_TYPES = [
@@ -15,7 +13,7 @@ SUPPORTED_CONTENT_TYPES = [
 
 
 def convert_headers(
-    headers: Optional[Iterable[Tuple[str, str]]],
+    headers: Iterable[tuple[str, str]] | None,
 ) -> list[tuple[str, str]]:
     if headers is None:
         return []
@@ -23,8 +21,8 @@ def convert_headers(
 
 
 def parse_content_length(
-    content_length: Optional[Union[str, bytes, int]],
-) -> Optional[int]:
+    content_length: str | bytes | int | None,
+) -> int | None:
     if content_length is None:
         return None
     if isinstance(content_length, int):
@@ -37,8 +35,7 @@ def parse_content_length(
         return None
 
 
-def is_supported_content_type(content_type: Optional[str]) -> bool:
+def is_supported_content_type(content_type: str | None) -> bool:
     if not content_type:
         return False
     return any(content_type.startswith(t) for t in SUPPORTED_CONTENT_TYPES)
-

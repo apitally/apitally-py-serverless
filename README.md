@@ -30,4 +30,3 @@ app.add_middleware(ApitallyMiddleware, config=config)
 ## Documentation
 
 For more information, see the [Apitally documentation](https://docs.apitally.io).
-

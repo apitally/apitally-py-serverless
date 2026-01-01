@@ -1,11 +1,11 @@
 [project]
 name = "apitally-serverless"
-description = "Simple API monitoring & analytics for REST APIs running on serverless platforms (e.g. AWS Lambda)."
+description = "Simple API monitoring & analytics for REST APIs running on serverless platforms (e.g. Cloudflare Workers)."
 authors = [{ name = "Apitally", email = "hello@apitally.io" }]
 readme = "README.md"
 license = { text = "MIT License" }
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
@@ -14,7 +14,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -27,15 +26,13 @@ classifiers = [
     "Topic :: System :: Monitoring",
     "Typing :: Typed",
 ]
-requires-python = ">=3.9,<4.0"
-dependencies = [
-    "typing-extensions>=4.0.0; python_version<'3.11'",
-]
+requires-python = ">=3.10,<4.0"
+dependencies = ["typing-extensions>=4.0.0; python_version<'3.11'"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-fastapi = ["fastapi>=0.94.1", "starlette>=0.26.1,<1.0.0"]
-starlette = ["starlette>=0.26.1,<1.0.0"]
+fastapi = ["fastapi>=0.116.1", "starlette>=0.47.2,<1.0.0"]
+starlette = ["starlette>=0.47.2,<1.0.0"]
 
 [project.urls]
 Homepage = "https://apitally.io"
@@ -43,16 +40,14 @@ Documentation = "https://docs.apitally.io"
 Repository = "https://github.com/apitally/apitally-py-serverless"
 
 [dependency-groups]
-dev = [
-    "mypy~=1.19.0",
-    "ruff~=0.14.0",
-]
+dev = ["mypy~=1.19.0", "ruff~=0.14.0"]
 test = [
     "pytest~=8.4.0",
     "pytest-asyncio~=0.21.2",
     "pytest-cov~=7.0.0",
-    "httpx>=0.22.0",
+    "pytest-mock~=3.15.0",
 ]
+types = ["types-pexpect", "types-pygments", "types-pyyaml"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -75,7 +70,7 @@ select = ["E", "F", "W", "I"]
 lines-after-imports = 2
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.13"
 check_untyped_defs = true
 
 [tool.pytest.ini_options]
@@ -87,4 +82,3 @@ source = ["apitally_serverless"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING"]
-

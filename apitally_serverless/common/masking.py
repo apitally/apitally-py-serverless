@@ -1,93 +1,102 @@
-from __future__ import annotations
-
 import json
 import re
-from typing import Any, Optional
+from typing import Any
 
 from apitally_serverless.common.config import ApitallyConfig
-from apitally_serverless.common.output import OutputData
+from apitally_serverless.common.output import OutputDataDict
 
 
 MASKED = "******"
 
 EXCLUDE_PATH_PATTERNS = [
-    re.compile(r"/_?healthz?$", re.IGNORECASE),
-    re.compile(r"/_?health[_-]?checks?$", re.IGNORECASE),
-    re.compile(r"/_?heart[_-]?beats?$", re.IGNORECASE),
-    re.compile(r"/ping$", re.IGNORECASE),
-    re.compile(r"/ready$", re.IGNORECASE),
-    re.compile(r"/live$", re.IGNORECASE),
+    r"/_?healthz?$",
+    r"/_?health[_-]?checks?$",
+    r"/_?heart[_-]?beats?$",
+    r"/ping$",
+    r"/ready$",
+    r"/live$",
 ]
-
 MASK_HEADER_PATTERNS = [
-    re.compile(r"auth", re.IGNORECASE),
-    re.compile(r"api-?key", re.IGNORECASE),
-    re.compile(r"secret", re.IGNORECASE),
-    re.compile(r"token", re.IGNORECASE),
-    re.compile(r"cookie", re.IGNORECASE),
+    r"auth",
+    r"api-?key",
+    r"secret",
+    r"token",
+    r"cookie",
 ]
-
 MASK_BODY_FIELD_PATTERNS = [
-    re.compile(r"password", re.IGNORECASE),
-    re.compile(r"pwd", re.IGNORECASE),
-    re.compile(r"token", re.IGNORECASE),
-    re.compile(r"secret", re.IGNORECASE),
-    re.compile(r"auth", re.IGNORECASE),
-    re.compile(r"card[-_]?number", re.IGNORECASE),
-    re.compile(r"ccv", re.IGNORECASE),
-    re.compile(r"ssn", re.IGNORECASE),
+    r"password",
+    r"pwd",
+    r"token",
+    r"secret",
+    r"auth",
+    r"card[-_ ]?number",
+    r"ccv",
+    r"ssn",
 ]
-
-
-def _match_patterns(value: str, patterns: list[re.Pattern[str]]) -> bool:
-    return any(pattern.search(value) for pattern in patterns)
 
 
 class DataMasker:
     def __init__(self, config: ApitallyConfig) -> None:
         self.config = config
+        self.exclude_path_patterns = [
+            re.compile(p, re.I) for p in dict.fromkeys(config.exclude_paths + EXCLUDE_PATH_PATTERNS)
+        ]
+        self.mask_header_patterns = [
+            re.compile(p, re.I) for p in dict.fromkeys(config.mask_headers + MASK_HEADER_PATTERNS)
+        ]
+        self.mask_body_field_patterns = [
+            re.compile(p, re.I) for p in dict.fromkeys(config.mask_body_fields + MASK_BODY_FIELD_PATTERNS)
+        ]
 
-    def _should_exclude_path(self, url_path: str) -> bool:
-        patterns = list(self.config.exclude_paths) + EXCLUDE_PATH_PATTERNS
-        return _match_patterns(url_path, patterns)
+    def apply_masking(self, data: OutputDataDict) -> None:
+        request = data["request"]
+        response = data["response"]
+
+        # Check if path is excluded
+        if self._should_exclude_path(request["path"]):
+            request["headers"] = None
+            request["body"] = None
+            response["headers"] = None
+            response["body"] = None
+            data["exclude"] = True
+            return
+
+        # Drop request and response bodies if logging is disabled
+        if not self.config.log_request_body and request["body"] is not None:
+            request["body"] = None
+        if not self.config.log_response_body and response["body"] is not None:
+            response["body"] = None
+
+        # Mask request and response body fields
+        if request["body"] is not None:
+            request["body"] = self._mask_body_bytes(request["body"], request["headers"])
+        if response["body"] is not None:
+            response["body"] = self._mask_body_bytes(response["body"], response["headers"])
+
+        # Mask request and response headers
+        if self.config.log_request_headers and request["headers"] is not None:
+            request["headers"] = self._mask_headers(request["headers"])
+        else:
+            request["headers"] = None
+
+        if self.config.log_response_headers and response["headers"] is not None:
+            response["headers"] = self._mask_headers(response["headers"])
+        else:
+            response["headers"] = None
+
+    def _should_exclude_path(self, path: str | None) -> bool:
+        return path is not None and any(p.search(path) for p in self.exclude_path_patterns)
 
     def _should_mask_header(self, name: str) -> bool:
-        patterns = list(self.config.mask_headers) + MASK_HEADER_PATTERNS
-        return _match_patterns(name, patterns)
+        return any(p.search(name) for p in self.mask_header_patterns)
 
     def _should_mask_body_field(self, name: str) -> bool:
-        patterns = list(self.config.mask_body_fields) + MASK_BODY_FIELD_PATTERNS
-        return _match_patterns(name, patterns)
+        return any(p.search(name) for p in self.mask_body_field_patterns)
 
-    def _mask_headers(
-        self, headers: list[tuple[str, str]]
-    ) -> list[tuple[str, str]]:
+    def _mask_headers(self, headers: list[tuple[str, str]]) -> list[tuple[str, str]]:
         return [(k, MASKED if self._should_mask_header(k) else v) for k, v in headers]
 
-    def _mask_body(self, data: Any) -> Any:
-        if isinstance(data, dict):
-            result = {}
-            for key, value in data.items():
-                if isinstance(value, str) and self._should_mask_body_field(key):
-                    result[key] = MASKED
-                else:
-                    result[key] = self._mask_body(value)
-            return result
-        if isinstance(data, list):
-            return [self._mask_body(item) for item in data]
-        return data
-
-    def _get_content_type(self, headers: Optional[list[tuple[str, str]]]) -> Optional[str]:
-        if not headers:
-            return None
-        for k, v in headers:
-            if k.lower() == "content-type":
-                return v
-        return None
-
-    def _mask_body_bytes(
-        self, body: bytes, headers: Optional[list[tuple[str, str]]]
-    ) -> bytes:
+    def _mask_body_bytes(self, body: bytes, headers: list[tuple[str, str]] | None) -> bytes:
         content_type = self._get_content_type(headers)
 
         try:
@@ -113,40 +122,23 @@ class DataMasker:
 
         return body
 
-    def apply_masking(self, data: OutputData) -> None:
-        # Check if path is excluded
-        if self._should_exclude_path(data.request.path):
-            data.request.headers = None
-            data.request.body = None
-            data.response.headers = None
-            data.response.body = None
-            data.exclude = True
-            return
+    def _mask_body(self, data: Any) -> Any:
+        if isinstance(data, dict):
+            result = {}
+            for key, value in data.items():
+                if isinstance(value, str) and self._should_mask_body_field(key):
+                    result[key] = MASKED
+                else:
+                    result[key] = self._mask_body(value)
+            return result
+        if isinstance(data, list):
+            return [self._mask_body(item) for item in data]
+        return data
 
-        # Drop request and response bodies if logging is disabled
-        if not self.config.log_request_body and data.request.body:
-            data.request.body = None
-        if not self.config.log_response_body and data.response.body:
-            data.response.body = None
-
-        # Mask request and response body fields
-        if data.request.body:
-            data.request.body = self._mask_body_bytes(
-                data.request.body, data.request.headers
-            )
-        if data.response.body:
-            data.response.body = self._mask_body_bytes(
-                data.response.body, data.response.headers
-            )
-
-        # Mask request and response headers
-        if self.config.log_request_headers and data.request.headers:
-            data.request.headers = self._mask_headers(data.request.headers)
-        else:
-            data.request.headers = None
-
-        if self.config.log_response_headers and data.response.headers:
-            data.response.headers = self._mask_headers(data.response.headers)
-        else:
-            data.response.headers = None
-
+    def _get_content_type(self, headers: list[tuple[str, str]] | None) -> str | None:
+        if not headers:
+            return None
+        for k, v in headers:
+            if k.lower() == "content-type":
+                return v
+        return None
