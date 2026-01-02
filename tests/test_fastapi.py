@@ -117,6 +117,11 @@ def test_logs_error_response(client: TestClient, capsys: pytest.CaptureFixture[s
     data = get_logged_data(capsys)
     assert data is not None
     assert data["request"]["path"] == "/error"
+    assert data["exception"] is not None
+    assert data["exception"]["type"] == "builtins.ValueError"
+    assert data["exception"]["msg"] == "test error"
+    assert data["exception"]["traceback"] is not None
+    assert "test_fastapi.py" in data["exception"]["traceback"]
 
 
 def test_logs_unhandled_request(client: TestClient, capsys: pytest.CaptureFixture[str]):
