@@ -40,6 +40,12 @@ class ValidationErrorDict(TypedDict):
     type: str
 
 
+class ExceptionDict(TypedDict):
+    type: str
+    msg: str
+    traceback: str
+
+
 class OutputDataDict(TypedDict):
     instance_uuid: str
     request_uuid: str
@@ -48,6 +54,7 @@ class OutputDataDict(TypedDict):
     request: RequestDataDict
     response: ResponseDataDict
     validation_errors: list[ValidationErrorDict] | None
+    exception: ExceptionDict | None
     exclude: NotRequired[bool]
 
 

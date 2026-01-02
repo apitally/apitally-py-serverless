@@ -14,6 +14,11 @@ from typing_extensions import Unpack
 
 from apitally_serverless.common.config import ApitallyConfig, ApitallyConfigKwargs
 from apitally_serverless.common.consumers import ApitallyConsumer
+from apitally_serverless.common.exceptions import (
+    get_exception_type,
+    get_truncated_exception_msg,
+    get_truncated_exception_traceback,
+)
 from apitally_serverless.common.headers import convert_headers, is_supported_content_type, parse_content_length
 from apitally_serverless.common.masking import DataMasker
 from apitally_serverless.common.output import (
@@ -70,6 +75,7 @@ class ApitallyMiddleware:
         response_size: int | None = None
         response_chunked = False
         response_content_type: str | None = None
+        exception: BaseException | None = None
 
         async def receive_wrapper() -> Message:
             nonlocal request_body, request_body_too_large
@@ -123,6 +129,9 @@ class ApitallyMiddleware:
 
         try:
             await self.app(scope, receive_wrapper, send_wrapper)
+        except BaseException as e:
+            exception = e
+            raise e from None
         finally:
             if response_time is None:
                 response_time = time.perf_counter() - start_time
@@ -173,6 +182,13 @@ class ApitallyMiddleware:
                     "body": response_body or None,
                 },
                 "validation_errors": validation_errors,
+                "exception": {
+                    "type": get_exception_type(exception),
+                    "msg": get_truncated_exception_msg(exception),
+                    "traceback": get_truncated_exception_traceback(exception),
+                }
+                if exception
+                else None,
             }
 
             self.masker.apply_masking(data)
