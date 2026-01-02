@@ -1,4 +1,4 @@
-.PHONY: format check test test-coverage
+.PHONY: format check test test-coverage publish-dev
 
 format:
 	uv run ruff check apitally_serverless tests --fix --select I
@@ -14,3 +14,8 @@ test:
 
 test-coverage:
 	uv run pytest -v --tb=short --cov --cov-report=xml
+
+publish-dev:
+	rm -rf dist
+	uv build
+	uv publish
