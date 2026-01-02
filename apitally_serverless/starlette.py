@@ -131,7 +131,7 @@ class ApitallyMiddleware:
             await self.app(scope, receive_wrapper, send_wrapper)
         except BaseException as e:
             exception = e
-            raise e from None
+            raise
         finally:
             if response_time is None:
                 response_time = time.perf_counter() - start_time
