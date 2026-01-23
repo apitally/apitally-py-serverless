@@ -8,6 +8,7 @@ check:
 	uv run ruff check apitally_serverless tests
 	uv run ruff format --diff apitally_serverless tests
 	uv run mypy --install-types --non-interactive apitally_serverless tests
+	uv lock --locked
 
 test:
 	uv run pytest -v --tb=short
