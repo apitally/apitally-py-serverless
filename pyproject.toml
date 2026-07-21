@@ -40,7 +40,7 @@ Documentation = "https://docs.apitally.io"
 Repository = "https://github.com/apitally/apitally-py-serverless"
 
 [dependency-groups]
-dev = ["mypy~=1.20.0", "pre-commit>=4.5.0", "ruff~=0.15.0"]
+dev = ["ruff~=0.15.0", "ty>=0.0.61"]
 test = [
     "httpx~=0.28.0",
     "pytest~=9.1.1",
@@ -48,7 +48,6 @@ test = [
     "pytest-cov~=7.1.0",
     "pytest-mock~=3.15.0",
 ]
-types = ["types-pexpect", "types-pygments", "types-pyyaml"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -71,9 +70,8 @@ select = ["E", "F", "W", "I"]
 [tool.ruff.lint.isort]
 lines-after-imports = 2
 
-[tool.mypy]
-python_version = "3.13"
-check_untyped_defs = true
+[tool.ty.environment]
+python-version = "3.13"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

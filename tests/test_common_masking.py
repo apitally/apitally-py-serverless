@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, cast
 
 from apitally_serverless.common.config import ApitallyConfig
 from apitally_serverless.common.masking import MASKED, DataMasker
@@ -7,7 +7,7 @@ from apitally_serverless.common.output import OutputDataDict
 
 
 def create_config(**kwargs: Any) -> ApitallyConfig:
-    defaults = {
+    defaults: dict[str, Any] = {
         "enabled": True,
         "log_request_headers": True,
         "log_request_body": True,
@@ -39,16 +39,20 @@ def create_output_data(
     }
     if response:
         response_dict.update(response)
-    return {
-        "instance_uuid": "00000000-0000-0000-0000-000000000000",
-        "request_uuid": "00000000-0000-0000-0000-000000000000",
-        "request": request_dict,  # type: ignore[typeddict-item]
-        "response": response_dict,  # type: ignore[typeddict-item]
-        "startup": None,
-        "consumer": None,
-        "validation_errors": None,
-        "exclude": False,
-    }
+    return cast(
+        OutputDataDict,
+        {
+            "instance_uuid": "00000000-0000-0000-0000-000000000000",
+            "request_uuid": "00000000-0000-0000-0000-000000000000",
+            "request": request_dict,
+            "response": response_dict,
+            "startup": None,
+            "consumer": None,
+            "validation_errors": None,
+            "exception": None,
+            "exclude": False,
+        },
+    )
 
 
 def test_exclude_paths():
