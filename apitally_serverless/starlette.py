@@ -211,7 +211,7 @@ def _get_path(request: Request, routes: list[BaseRoute] | None = None) -> str | 
         routes = request.app.routes
     for route in routes:
         if hasattr(route, "routes"):
-            path = _get_path(request, routes=route.routes)
+            path = _get_path(request, routes=getattr(route, "routes"))
             if path is not None:
                 return path
         elif hasattr(route, "path"):
@@ -232,7 +232,7 @@ def _get_routes(app: ASGIApp | Router) -> list[BaseRoute]:
     if isinstance(app, Router):
         return app.routes
     elif hasattr(app, "app"):
-        return _get_routes(app.app)
+        return _get_routes(getattr(app, "app"))
     return []  # pragma: no cover
 
 
