@@ -40,7 +40,7 @@ Documentation = "https://docs.apitally.io"
 Repository = "https://github.com/apitally/apitally-py-serverless"
 
 [dependency-groups]
-dev = ["ruff~=0.15.0", "ty>=0.0.61"]
+dev = ["ruff~=0.16.1", "ty>=0.0.61"]
 test = [
     "httpx~=0.28.0",
     "pytest~=9.1.1",
