@@ -187,7 +187,7 @@ class ApitallyMiddleware:
                     "msg": get_truncated_exception_msg(exception),
                     "traceback": get_truncated_exception_traceback(exception),
                 }
-                if exception
+                if exception is not None
                 else None,
             }
 
