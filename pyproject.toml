@@ -43,7 +43,7 @@ Repository = "https://github.com/apitally/apitally-py-serverless"
 dev = ["ruff~=0.17.0", "ty>=0.0.61"]
 test = [
     "httpx~=0.28.0",
-    "pytest~=9.1.1",
+    "pytest~=9.2.0",
     "pytest-asyncio~=1.4.0",
     "pytest-cov~=7.1.0",
     "pytest-mock~=3.17.0",
