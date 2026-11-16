@@ -63,7 +63,7 @@ uptime checks. Alert notifications can be delivered via email, Slack and Microso
 | ------------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
 | [**FastAPI**](https://github.com/fastapi/fastapi) | `>=0.116.1`        | [Link](https://docs.apitally.io/setup-guides/fastapi-cloudflare-workers) |
 
-Apitally also supports many other web frameworks in [Python](https://github.com/apitally/apitally-py), [JavaScript](https://github.com/apitally/apitally-js), [Go](https://github.com/apitally/apitally-go), [.NET](https://github.com/apitally/apitally-dotnet) and [Java](https://github.com/apitally/apitally-java) via our other SDKs.
+Apitally also supports many other web frameworks in [Python](https://github.com/apitally/apitally-py), [JavaScript](https://github.com/apitally/apitally-js), [Go](https://github.com/apitally/apitally-go) and [.NET](https://github.com/apitally/apitally-dotnet) via our other SDKs.
 
 ## Getting started
 
