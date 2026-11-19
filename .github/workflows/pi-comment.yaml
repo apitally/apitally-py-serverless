@@ -49,8 +49,8 @@ jobs:
           token: ${{ secrets.PI_GITHUB_TOKEN }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: "24"
-      - uses: shaftoe/pi-coding-agent-action@f7496a9aea9798c5d52d39096d98d5c5b16559b3 # v2.30.0
+          node-version: "26"
+      - uses: shaftoe/pi-coding-agent-action@c9c89dcabbf612ab2a528acfad8785a8075e22f3 # v2.30.2
         with:
           github_token: ${{ github.token }}
           provider: openrouter
