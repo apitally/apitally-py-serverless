@@ -72,8 +72,8 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", marker = "extra == 'fastapi'", specifier = ">=0.116.1" },
-    { name = "starlette", marker = "extra == 'fastapi'", specifier = ">=0.47.2,<1.0.0" },
-    { name = "starlette", marker = "extra == 'starlette'", specifier = ">=0.47.2,<1.0.0" },
+    { name = "starlette", marker = "extra == 'fastapi'", specifier = ">=0.47.2,<2.0.0" },
+    { name = "starlette", marker = "extra == 'starlette'", specifier = ">=0.47.2,<2.0.0" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.0.0" },
 ]
 provides-extras = ["fastapi", "starlette"]
